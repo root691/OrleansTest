@@ -9,6 +9,8 @@ namespace Client
 {
     internal static class Program
     {
+        private static IGrainWithStore _grain;
+
         private static async Task Main()
         {
             Console.Write("Waiting to start...");
@@ -40,19 +42,23 @@ namespace Client
                 {
                     options.Invariant = "Npgsql";
                     options.ConnectionString =
-                        "User ID=test_user;Password=test_password;Host=test_db;Port=5432;Database=orleans_test;Pooling=false;Enlist=false";
+                        "User ID=test_user;Password=test_password;Host=test_db;Port=5432;Database=orleans_test;Pooling=false;Enlist=false;SearchPath=orleans_test";
                 })
                 .ConfigureApplicationParts(manager => manager.AddApplicationPart(typeof(ILongRunningTask).Assembly))
                 .Build();
 
             await client.Connect();
+            _grain = client.GetGrain<IGrainWithStore>("test-grain");
             return client;
         }
 
         private static async Task DoWork(this IClusterClient client)
         {
-            var grain = client.GetGrain<ILongRunningTask>(Guid.NewGuid());
-            var response = await grain.Execute("Test");
+            //var grain = client.GetGrain<ILongRunningTask>(Guid.NewGuid());
+            //var response = await grain.Execute("Test");
+
+            var response = await _grain.IncrementAndReturn();
+
             Console.WriteLine($"Get response from server in {DateTime.Now:HH:mm:ss.fff}: {response}");
         }
     }

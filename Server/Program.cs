@@ -51,7 +51,15 @@ namespace Server
                         {
                             options.Invariant = "Npgsql";
                             options.ConnectionString =
-                                "User ID=test_user;Password=test_password;Host=test_db;Port=5432;Database=orleans_test;Pooling=false;Enlist=false";
+                                "User ID=test_user;Password=test_password;Host=test_db;Port=5432;Database=orleans_test;Pooling=false;Enlist=false;SearchPath=orleans_test";
+                        })
+                        .AddAdoNetGrainStorageAsDefault(options =>
+                        {
+                            options.Invariant = "Npgsql";
+                            options.ConnectionString =
+                                "User ID=test_user;Password=test_password;Host=test_db;Port=5432;Database=orleans_test;Pooling=false;Enlist=false;SearchPath=orleans_test";
+                            options.UseJsonFormat = true;
+                            options.UseFullAssemblyNames = true;
                         })
                         .ConfigureEndpoints(configuration.GetValue<int>("silo"), configuration.GetValue<int>("gateway"))
                         .ConfigureLogging(builder =>
